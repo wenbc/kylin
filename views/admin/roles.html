@@ -1,0 +1,175 @@
+<div class="col-xs-12">
+	<p>
+		<button class="btn btn-sm btn-default" data-toggle="modal" data-target="#addRoleModal">
+			<i class="glyphicon glyphicon-plus"></i>
+			添加角色
+		</button>
+
+		<button class="btn btn-sm btn-success" id="refreshRole">
+			<i class="icon-refresh"></i>
+			刷新角色
+		</button>
+		
+	</p>	
+	
+	<div class="table-header">
+	</div>
+	<div class="table-responsive">
+		<table id="roletable" class="table table-striped table-bordered table-hover">
+			<thead>
+			<tr>
+				<th>ID</th>
+				<th>角色组名</th>
+				<th>描述</th>
+				<th>状态</th>
+				<th></th>
+			</tr>
+			</thead>
+			<tbody>
+			{{ range .Roles}}
+				<tr>
+				<td>{{ .Id }}</td>
+				<td>{{ .Name }}</td>
+				<td>{{ .Remark }}</td>
+				{{ if eq 2 .Status }}
+				<td class="hidden-480"><span class="label label-sm label-success">启用</span></td>
+				{{else}}
+				<td class="hidden-480"><span class="label label-sm label-warning">禁用</span></td>
+				{{end}}
+				<td>
+					<div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+						
+						<a  class="btn btn-xs btn-success" id="roleCompetence_{{ .Id }}">
+							<i class="icon-flag bigger-120"></i>
+							授权
+						</a>
+						<a class="btn btn-xs btn-success" id="roleUserList_{{ .Id }}">
+							<i class="icon-flag bigger-120"></i>
+							用户列表
+						</a>
+						<a class="btn btn-xs btn-info"  id="roleId_{{ .Id }}">
+							<i class="icon-pencil bigger-130"></i>		
+						</a>
+						<a class="btn btn-xs btn-danger" id="roleDelId_{{ .Id }}">
+							<i class="icon-trash bigger-130"></i>
+						</a>
+					</div>											
+				</td>
+			 </tr>
+			{{ end }}
+			</tbody>
+		</table>
+	</div>
+	
+	<!-- 添加项目模态框（Modal） -->
+		<div class="modal fade" id="addRoleModal" tabindex="-1" role="dialog" aria-labelledby="addRoleModalLabel">
+  			<div class="modal-dialog" role="document">
+   				<div class="modal-content">
+     				<div class="modal-header">
+        				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        					<h4 class="modal-title" id="addRoleModalLabel">角色信息</h4>
+      				</div>
+      				<div class="modal-body form-horizontal">
+								<label class="col-sm-3">角色组名:</label>
+								<input type="text" id="roleName">
+								<p></p>
+								<label class="col-sm-3">描述:</label>
+								<input type="text" id="roleRemark">
+								<p></p>
+								<label class="col-sm-3">状态:</label>
+								<select id="roleStatus">
+									<option value="2">启用</option>
+									<option value="1">禁用</option>
+								</select>
+      				</div>
+     				<div class="modal-footer">
+       					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        				<button id="addRole" type="button" class="btn btn-primary">保存</button>
+      				</div>
+   				</div>
+  			</div>
+		</div>
+<div id="jumpDialog"></div>
+</div>
+<script type="text/javascript">
+var oTable = $('#roletable').dataTable({
+		"bPaginate": false,
+		"bDeferRender" : true,
+		"bAutoWidth":false, 
+});
+$('#addRole').click(function(){
+	var roleName = $('#roleName').val();
+	if (roleName == ""){
+		alert("角色组名不能为为空！");
+		return false;
+	}
+	var roleRemark = $('#roleRemark').val();
+	var status = $('#roleStatus').val();
+	$.post(
+		'/admin/role/AddRole',
+		{	
+			Name:roleName,
+			Remark:roleRemark,
+			Status:status,
+		},
+		function(data){
+			if (data == "1"){
+				alert("创建成功！");
+				$('#addRoleModal').modal('hide');
+			}else{
+				alert(data);
+			}
+		}
+	);
+});
+$('#refreshRole').click(function(){
+	$.get(
+		'/admin/role/index',
+		function(data){
+			$('.page-content').html(data).show();
+		}
+	);
+});
+{{ range .Roles}}
+$('#roleDelId_{{ .Id }}').click(function(){
+	if (!confirm('确认删除角色？\n'+{{ .Name }})){
+		return;
+	}
+	$.post(
+		'/admin/role/DelRole',
+		{
+			Id:"{{ .Id }}",
+		},
+		function(data){
+			$('.page-content').html(data).show();
+		}
+	);
+});
+
+$('#roleId_{{ .Id }}').click(function(){
+	$.get(
+		'/admin/role/index/{{ .Id }}',
+		function(data){
+			$('#jumpDialog').html(data).show();
+		}
+	);
+});
+
+$('#roleCompetence_{{ .Id }}').click(function(){
+	$.get(
+		'/admin/role/AccessToNode?Id={{ .Id }}',
+		function(data){
+			$('#jumpDialog').html(data).show();
+		});
+});
+
+$('#roleUserList_{{ .Id }}').click(function(){
+	$.get(
+		'/admin/role/RoleToUserList?Id={{ .Id }}',
+		function(data){
+			$('#jumpDialog').html(data).show();
+		});
+});
+{{ end }}
+
+</script>

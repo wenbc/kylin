@@ -1,0 +1,18 @@
+#jumpDialog{
+	border: 1px solid red;
+	display: none;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	width: 660px;
+	/*height: 280px;*/
+	padding: 20px;
+	margin-left: -350px;
+	margin-top: -200px;
+	background-color: white;
+	z-index: 100;
+	border: 1px solid #ece5d8;
+	border-radius: 15px;
+	box-shadow: 0px 0px 50px rgba(0, 0, 0, 0.5);
+	/*font-size: 14px;*/
+}

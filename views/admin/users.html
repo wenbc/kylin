@@ -1,0 +1,176 @@
+<div class="col-xs-12">
+	<p>
+		<button class="btn btn-sm btn-default" data-toggle="modal" data-target="#addUserModal">
+			<i class="glyphicon glyphicon-plus"></i>
+			添加用户
+		</button>
+
+		<button class="btn btn-sm btn-success" id="refreshUser">
+			<i class="icon-refresh"></i>
+			刷新用户
+		</button>
+		
+	</p>	
+	
+	<div class="table-header">
+	</div>
+	<div class="table-responsive">
+		<table id="userstable" class="table table-striped table-bordered table-hover">
+			<thead>
+			<tr>
+				<th>ID</th>
+				<th>用户名</th>
+				<th>Email</th>
+				<th>状态</th>
+				<th>上次登录时间</th>
+				<th>创建时间</th>
+				<th></th>
+			</tr>
+			</thead>
+			<tbody>
+			{{ range .Users}}
+				<tr>
+				<td>{{ .Id }}</td>
+				<td>{{ .Username }}</td>
+				<td>{{ .Email }}</td>
+				{{ if eq 2 .Status }}
+				<td class="hidden-480"><span class="label label-sm label-success">启用</span></td>
+				{{else}}
+				<td class="hidden-480"><span class="label label-sm label-warning">禁用</span></td>
+				{{end}}
+				{{ if gt 0  (.Lastlogintime|printf "%s" |len) }}
+					<td>{{date .Lastlogintime  "Y-m-d H:i:s"}}</td>
+				{{else}}
+					<td>{{.Lastlogintime}}</td>
+				{{end}}
+				<td>{{date .Createtime "Y-m-d H:i:s"}}</td>
+				<td>
+					<div class="visible-md visible-lg hidden-sm hidden-xs action-buttons">
+						<a class="btn btn-xs btn-info">
+							<i class="icon-pencil bigger-130" id="userId_{{ .Id }}"></i>		
+						</a>
+						<a class="btn btn-xs btn-danger">
+							<i class="icon-trash bigger-130" id="userDelId_{{ .Id }}"></i>
+						</a>
+					</div>											
+				</td>
+			 </tr>
+			{{ end }}
+			</tbody>
+		</table>
+	</div>
+	
+	<!-- 添加项目模态框（Modal） -->
+		<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel">
+  			<div class="modal-dialog" role="document">
+   				<div class="modal-content">
+     				<div class="modal-header">
+        				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        					<h4 class="modal-title" id="addUserModalLabel">用户信息</h4>
+      				</div>
+      				<div class="modal-body form-horizontal">
+								<label class="col-sm-3">用户名:</label>
+								<input type="text" id="userName">
+								<p></p>
+								<label class="col-sm-3">密码:</label>
+								<input type="password" id="passWord1">
+								<p></p>
+								<label class="col-sm-3">确认密码:</label>
+								<input type="password" id="passWord2">
+								<p></p>
+								<label class="col-sm-3">Email:</label>
+								<input type="text" id="userEmail">
+								<p></p>
+								<label class="col-sm-3">状态:</label>
+								<select id="userStatus">
+									<option value="2">启用</option>
+									<option value="1">禁用</option>
+								</select>
+      				</div>
+     				<div class="modal-footer">
+       					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+        				<button id="addUser" type="button" class="btn btn-primary">保存</button>
+      				</div>
+   				</div>
+  			</div>
+		</div>
+<div id="jumpDialog"></div>
+</div>
+<script type="text/javascript">
+var oTable = $('#userstable').dataTable({
+		"bPaginate": false,
+		"bDeferRender" : true,
+		"bAutoWidth":false, 
+});
+$('#addUser').click(function(){
+	var userName = $('#userName').val();
+	if (userName == ""){
+		alert("用户名不能为为空！");
+		return false;
+	}
+	var passWord1 = $('#passWord1').val();
+	if (passWord1 == ""){
+		alert("密码不能为为空！");
+		return false;
+	}
+	var passWord2 = $('#passWord2').val();
+	if (passWord2 == ""){
+		alert("确认密码不能为为空！");
+		return false;
+	}
+	var email =$('#userEmail').val();
+	var status = $('#userStatus').val();
+	$.post(
+		'/admin/user/AddUser',
+		{	
+			Username:userName,
+			Password:passWord1,
+			Repassword:passWord2,
+			Email:email,
+			Status:status,
+		},
+		function(data){
+			if (data == "1"){
+				alert("创建成功！");
+				$('#addUserModal').modal('hide');
+			}else{
+				alert(data);
+			}
+		}
+	);
+});
+$('#refreshUser').click(function(){
+	$.get(
+		'/admin/user/index',
+		function(data){
+			$('.page-content').html(data).show();
+		}
+	);
+});
+{{ range .Users}}
+$('#userDelId_{{ .Id }}').click(function(){
+	if (!confirm('确认删除用户？\n'+{{ .Username }})){
+		return;
+	}
+	$.post(
+		'/admin/user/DelUser',
+		{
+			Id:"{{ .Id }}",
+		},
+		function(data){
+			$('.page-content').html(data).show();
+		}
+	);
+});
+{{ end }}
+{{ range .Users}}
+$('#userId_{{ .Id }}').click(function(){
+	$.get(
+		'/admin/user/index/{{ .Id }}',
+		function(data){
+			$('#jumpDialog').html(data).show();
+		}
+	);
+});
+{{ end }}
+</script>

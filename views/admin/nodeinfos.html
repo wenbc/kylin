@@ -1,0 +1,134 @@
+<div class="page-header">
+	<h1>编辑节点</h1>
+</div><!-- /.page-header -->
+
+<div class="row">
+	<div class="col-xs-12 form-horizontal">
+	<!-- PAGE CONTENT BEGINS -->
+	{{ range .Nodes }}
+		<div class="form-group">
+			<label class="col-sm-3 control-label no-padding-right" for="form-field-group">分组:</label>
+
+			<div class="col-sm-9">
+				<input type="text" readonly="" id="form-field-group" value="{{ .Group__Title }}" class="col-xs-10 col-sm-5" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-3 control-label no-padding-right" for="form-field-id">Id:</label>
+
+			<div class="col-sm-9">
+				<input type="text" readonly="" id="form-field-id" value="{{ .Id }}" class="col-xs-10 col-sm-5" />
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="col-sm-3 control-label no-padding-right" for="form-field-name">显示名:</label>
+
+			<div class="col-sm-9">
+				<input type="text" id="form-field-name"  value="{{ .Title }}" class="col-xs-10 col-sm-5" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label no-padding-right" for="form-input-url">应用URL:</label>
+
+			<div class="col-sm-9">
+				<input type="text" id="form-input-url"  value="{{ .Name }}" class="col-xs-10 col-sm-5"/>							
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-sm-3 control-label no-padding-right" for="form-input-remark">描述:</label>
+
+			<div class="col-sm-9">	
+				<input type="text" id="form-input-remark"  value="{{ .Remark }}" class="col-xs-10 col-sm-5"/>	
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="col-sm-3 control-label no-padding-right" for="form-field-status">Status</label>
+
+			<div class="col-sm-9">
+				<select id="form-field-status">
+					{{ if eq 2 .Status }}
+						<option value="2" selected = "selected" >启用</option>
+						<option value="1">禁用</option>
+					{{else}}
+						<option value="2">启用</option>
+						<option value="1" selected = "selected">禁用</option>
+					{{end}}
+				</select>
+			</div>
+		</div>
+		
+		
+		
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" id="submit">
+					<i class="icon-ok bigger-110"></i>
+						保存
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" id="cancel">
+					<i class="icon-undo bigger-110"></i>
+						取消
+				</button>
+			</div>
+		</div>
+	{{end}}
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('#submit').click(function(){
+		var id  = $('#form-field-id').val();
+		if (id == ""){
+			alert("Id 为空！");
+			return false;
+		}
+		var name = $('#form-field-name').val();
+		if (name == ""){
+			alert("显示名 为空！");
+			return false;
+		}
+		var url = $('#form-input-url').val();
+		if (url == ""){
+			alert("应用URL 为空！");
+			return false;
+		}
+
+		var remark = $('#form-input-remark').val();
+		
+		var status = $('#form-field-status').val();
+		if (status == ""){
+			alert("Status 为空！");
+			return false;
+		}
+		$.post(
+			'/admin/node/UpdateNode',
+			{
+				Id:id,
+				Title:name,
+				Name:url,
+				Remark:remark,
+				Status:status,
+			},
+			function(data){
+				if (data == "1"){
+					alert("提交成功！");
+					$('#jumpDialog').hide();
+				}else{
+					alert(data);
+				}
+			}
+		);
+	});
+	
+	$('#cancel').click(function(){
+		$('#jumpDialog').hide();
+		return false;
+	});
+	
+</script>

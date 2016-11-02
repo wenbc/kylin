@@ -1,0 +1,93 @@
+<div class="page-header">
+		<div class="form-group">
+			<label for="groupRole"><h5>角色组名:</h5></label>
+			<input id="groupRole" type="text"  readonly="" value="{{.RoleName}}"></input>
+		</div>
+</div>
+	
+<div>
+	<table id="roleUsers" class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th class="center">
+					<label>
+						<input type="checkbox" class="ace" />
+						<span class="lbl"></span>
+					</label>
+				</th>
+				<th>用户名</th>
+			</tr>					
+		</thead>
+		<tbody>
+			{{ range .Users }}
+			<tr userid="{{ .Id }}">
+				<td class="center">
+					<label>
+						{{ if .Checked }}
+						<input type="checkbox" class="ace" checked="checked"/>
+						{{ else }}
+						<input type="checkbox" class="ace"/>
+						{{ end }}
+						<span class="lbl"></span>
+					</label>
+				</td>
+				<td>{{ .Username }}</td>									
+			</tr>
+			{{ end }}
+		</tbody>										
+	</table>									
+</div>
+
+<div class="clearfix form-actions">
+	<div class="col-md-offset-3 col-md-9">
+		<button class="btn btn-info" id="submit">
+		<i class="icon-ok bigger-60"></i>
+			保存
+		</button>
+
+		&nbsp; &nbsp; &nbsp;
+		<button class="btn" id="cancel">
+		<i class="icon-undo bigger-60"></i>
+			取消
+		</button>
+	</div>
+</div>
+
+<script type="text/javascript">
+
+$('#cancel').click(function(){
+	$('#jumpDialog').hide();
+	return false;
+});
+$('table th input:checkbox').on('click' , function(){
+	var that = this;
+	$(this).closest('table').find('tr > td:first-child input:checkbox')
+	.each(function(){
+		this.checked = that.checked;
+		$(this).closest('tr').toggleClass('selected');
+	});
+});
+$('#submit').click(function(){
+	var userIds = [];
+	$('table tbody tr input').each(function(){
+		if (this.checked){
+			var uid = $(this).parent().parent().parent().attr('userid');
+			userIds.push(uid);
+		}
+	});
+	$.post(
+		'/admin/role/AddRoleToUser',
+		{
+			Id: "{{ .RoleId }}",
+			ids: userIds.join(","),	
+		},
+		function(data){
+			if (data == "1"){
+				alert("提交成功！");
+				$('#jumpDialog').hide();
+			}else{
+				alert(data);
+			}
+		});
+});
+</script>

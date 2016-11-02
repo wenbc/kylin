@@ -1,0 +1,81 @@
+<div class="page-header form-inline">
+		<div class="form-group">
+			<label for="groupId">项目分组:</label>
+			<select id="groupId" class="form-control">
+				<option>无</option>
+				{{ range .GroupList }}
+				<option value="{{ .Id }}">{{ .Name }}</option>
+				{{ end }}
+			</select>
+		</div>
+
+		<div class="form-group">
+			<label for="groupRole">角色组名:</label>
+			<input id="groupRole" type="text" class="form-control" readonly="" value="{{.RoleName}}"></input>
+		</div>
+</div><!-- /.page-header -->
+<div id="getNodeCon" onload="GetNodeContent()">
+		
+</div>
+<div class="clearfix form-actions">
+	<div class="col-md-offset-3 col-md-9">
+		<button class="btn btn-info" id="submit">
+		<i class="icon-ok bigger-60"></i>
+			保存
+		</button>
+
+		&nbsp; &nbsp; &nbsp;
+		<button class="btn" id="cancel">
+		<i class="icon-undo bigger-60"></i>
+			取消
+		</button>
+	</div>
+</div>
+<script type="text/javascript">
+	$('#groupId').change(function(){
+		//var gid = $('#groupId').val();
+		GetNodeContent();
+	});
+	function GetNodeContent(){
+		var gid = $('#groupId').val();
+		$.ajax({
+			type:"POST",
+			url:"/admin/role/AccessToNode",
+			data:{group_id:gid,Id:"{{ .RoleId }}"},
+			success:function(data){
+				$('#getNodeCon').html(data).show();
+			}
+		});
+	}
+	$('#cancel').click(function(){
+		$('#jumpDialog').hide();
+		return false;
+	});
+	$('#submit').click(function(){
+            var treeObj=$.fn.zTree.getZTreeObj("treeDemo"),
+            nodes=treeObj.getCheckedNodes(true),
+            v="";
+            for(var i=0;i<nodes.length;i++){
+            v+=nodes[i].target + ",";
+            //alert(nodes[i].id); //获取选中节点的值
+            }
+			var gid = $('#groupId').val();
+			$.post(
+				'/admin/role/AddAccess',
+				{
+					nids: v,
+					group_id:gid,
+					rid: '{{ .RoleId }}'
+				},
+				function(data){
+					if (data == "1"){
+						alert("提交成功！");
+						$('#jumpDialog').hide();
+					}else{
+						alert(data);
+					}
+				});
+			return false;
+		});
+	
+</script>

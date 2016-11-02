@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+	<TITLE> ZTREE DEMO - checkbox</TITLE>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css" type="text/css">
+	<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ztree.core.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.ztree.excheck.js"></script>
+</HEAD>
+
+<BODY>
+<div>
+	<ul id="treeDemo" class="ztree"></ul>
+</div>
+<SCRIPT type="text/javascript">
+		var setting = {
+			check: {
+				enable: true
+			},
+			data: {
+				simpleData: {
+					enable: true
+				}
+			}
+		};
+
+		var zNodes =[
+			{{ range .Nodes }}
+				
+				{{ if .Pid }}   
+					{{ if .Checked }}
+						{ id:{{ .Level }}, pId:{{ .Pid }}, target:{{ .Id }},name:"{{ .Title }}", open:true,checked:true},
+					{{ else }}
+						{ id:{{ .Level }}, pId:{{ .Pid }}, target:{{ .Id }},name:"{{ .Title }}", open:false},
+					{{ end }}
+				{{ else }} //项目节点
+					{{ if .Checked }}
+						{ id:{{ .Level }}, pId:0, target:{{ .Id }},name:"{{ .Title }}", open:true,checked:true},
+					{{ else }}
+						{ id:{{ .Level }}, pId:0, target:{{ .Id }},name:"{{ .Title }}", open:false},
+					{{ end }}
+				{{ end }}
+			{{ end }}
+		];
+		
+		$(document).ready(function(){
+			$.fn.zTree.init($("#treeDemo"), setting, zNodes);
+		});
+</SCRIPT>
+
+</BODY>
+</HTML>

@@ -1,0 +1,15 @@
+fyws host
+<button id="testid">游戏服信息</button>
+<div id="testcontent">
+
+</div>
+<script type="text/javascript">
+$('#testid').click(function(){
+	$.get(
+		'/fyws/game/index/',
+		function(data){
+			$('#testcontent').html(data).show();
+		}
+	);
+});
+</script>
